@@ -1,5 +1,5 @@
-import { getAvatarColor } from '../utils';
-import { OWNER_COLORS, AVATAR_COLORS } from '../constants';
+import { getAvatarColor } from './utils';
+import { OWNER_COLORS, AVATAR_COLORS } from './constants';
 
 describe('getAvatarColor', () => {
   it('should return explicit color if provided', () => {

@@ -14,7 +14,7 @@ import { searchRecipes } from './services/recipeSearchService';
 import { useAppContext } from './context/AppContext';
 
 // IMPORTANT: Ensure these are the client-side Firebase SDKs, not 'firebase-admin'
-import { auth } from './src/firebaseConfig'; // Adjust this path to your firebase config file
+import { auth } from './firebase'; // Adjust this path to your firebase config file
 import { useAuthState } from 'react-firebase-hooks/auth';
 import AuthComponent from './components/Auth'; // Rename your local Auth component to avoid conflicts
 
