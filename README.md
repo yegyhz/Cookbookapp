@@ -31,6 +31,23 @@ GEMINI_API_KEY=your_gemini_api_key_here
 
 If you are using Firebase, ensure your `firebase.ts` is configured with your project credentials.
 
+### Connecting Firebase (client + server)
+
+- Client: provide the Firebase web app config via Vite env vars prefixed with `VITE_`. See `.env.example` for keys. Example values in your `.env` (client-side values will be baked into the bundle):
+
+```env
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=...
+VITE_FIREBASE_APP_ID=...
+```
+
+- Server (admin): create a Firebase service account key JSON from the Firebase Console (Project Settings → Service accounts → Create new private key) and save it locally at `server/serviceAccountKey.json` (or set `SERVICE_ACCOUNT_PATH` to its location). **Do not commit this file.**
+
+You can deploy Firestore security rules using the Firebase CLI with `firebase deploy --only firestore:rules` after logging in and selecting your project.
+
 ### 3. Run the dev server
 
 ```bash

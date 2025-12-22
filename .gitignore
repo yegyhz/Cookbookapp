@@ -24,6 +24,7 @@ dist-ssr
 *.sw?
 <<<<<<< HEAD
 serviceAccountKey.json
+/server/serviceAccountKey.json
 postcss.config.js
 =======
 >>>>>>> 01790d1 (Initial commit)
