@@ -22,9 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-<<<<<<< HEAD
+*.sw?
 serviceAccountKey.json
 /server/serviceAccountKey.json
 postcss.config.js
-=======
->>>>>>> 01790d1 (Initial commit)
+.env
