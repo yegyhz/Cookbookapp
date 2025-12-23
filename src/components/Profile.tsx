@@ -14,7 +14,7 @@ interface UserProfile {
 
 const Profile: React.FC = () => {
   const [user] = useAuthState(auth);
-  const { setAppError } = useAppContext();
+  const [appError, setAppError] = useState<string | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -22,24 +22,28 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
-          const docSnap = await getDoc(userDocRef);
-          if (docSnap.exists()) {
-            setProfile(docSnap.data() as UserProfile);
-            setNewDisplayName(docSnap.data().displayName || '');
-          } else {
-            setAppError("User profile not found.");
-            setProfile({ email: user.email || '', displayName: user.email?.split('@')[0] || 'New User' });
-            setNewDisplayName(user.email?.split('@')[0] || 'New User');
-          }
-        } catch (e: any) {
-          setAppError(e.message);
-        } finally {
-          setLoading(false);
+      if (!user) return;
+      setLoading(true);
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const docSnap = await getDoc(userDocRef);
+        if (docSnap.exists()) {
+          setProfile(docSnap.data() as UserProfile);
+          setNewDisplayName(docSnap.data().displayName || '');
+        } else {
+          // Fallback if no profile exists
+          const defaultProfile = { email: user.email || '', displayName: user.email?.split('@')[0] || 'New User' };
+          setProfile(defaultProfile);
+          setNewDisplayName(defaultProfile.displayName);
         }
+      } catch (e: any) {
+        setAppError(e.message);
+      } finally {
+        setLoading(false);
       }
     };
     fetchProfile();
-  }, [user, setAppError]);
+  }, [user]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();

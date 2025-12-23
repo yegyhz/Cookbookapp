@@ -1,6 +1,8 @@
-import { Recipe } from '../types';
+import { Recipe, Category } from '../types';
 
 // Mock data for simulation
+// This service mimics the behavior of a real backend for development
+// switching to the real backend will require updating these functions to call the API endpoints
 const MOCK_RECIPES: Recipe[] = [
   {
     id: '1',
@@ -8,13 +10,14 @@ const MOCK_RECIPES: Recipe[] = [
     description: 'Classic Roman pasta dish.',
     ingredients: ['Spaghetti', 'Eggs', 'Pancetta', 'Pecorino Romano'],
     instructions: ['Cook spaghetti.', 'Fry pancetta.', 'Mix eggs and cheese.', 'Combine all.'],
-    category: 'Pasta',
+    category: Category.MAIN_DISHES,
     prepTime: '15 min',
     cookTime: '20 min',
     yields: '2 servings',
     imageUrl: '',
     addedBy: 'Chef John',
     userColor: '#FF5733',
+    timestamp: Date.now(),
   },
   {
     id: '2',
@@ -22,13 +25,14 @@ const MOCK_RECIPES: Recipe[] = [
     description: 'A rich and spicy chicken curry.',
     ingredients: ['Chicken', 'Curry powder', 'Coconut milk', 'Onion', 'Garlic'],
     instructions: ['Sauté onion and garlic.', 'Add chicken and curry powder.', 'Stir in coconut milk and simmer.'],
-    category: 'Curry',
+    category: Category.MAIN_DISHES,
     prepTime: '20 min',
     cookTime: '40 min',
     yields: '4 servings',
     imageUrl: '',
     addedBy: 'Chef Jane',
     userColor: '#33FF57',
+    timestamp: Date.now(),
   },
   {
     id: '3',
@@ -36,13 +40,14 @@ const MOCK_RECIPES: Recipe[] = [
     description: 'Quick and healthy stir fry with seasonal vegetables.',
     ingredients: ['Broccoli', 'Carrots', 'Bell peppers', 'Soy sauce', 'Ginger'],
     instructions: ['Chop vegetables.', 'Stir fry vegetables.', 'Add soy sauce and ginger.'],
-    category: 'Vegetarian',
+    category: Category.MAIN_DISHES,
     prepTime: '15 min',
     cookTime: '15 min',
     yields: '3 servings',
     imageUrl: '',
     addedBy: 'Chef Alex',
     userColor: '#5733FF',
+    timestamp: Date.now(),
   },
   {
     id: '4',
@@ -50,13 +55,14 @@ const MOCK_RECIPES: Recipe[] = [
     description: 'Creamy beef and mushroom dish.',
     ingredients: ['Beef sirloin', 'Mushrooms', 'Onion', 'Sour cream', 'Egg noodles'],
     instructions: ['Cook egg noodles.', 'Sear beef.', 'Sauté mushrooms and onion.', 'Combine with sour cream.'],
-    category: 'Beef',
+    category: Category.MAIN_DISHES,
     prepTime: '25 min',
     cookTime: '30 min',
     yields: '4 servings',
     imageUrl: '',
     addedBy: 'Chef Maria',
     userColor: '#FF33A8',
+    timestamp: Date.now(),
   },
   {
     id: '5',
@@ -64,13 +70,14 @@ const MOCK_RECIPES: Recipe[] = [
     description: 'Hearty and healthy lentil soup.',
     ingredients: ['Lentils', 'Carrots', 'Celery', 'Onion', 'Vegetable broth'],
     instructions: ['Sauté vegetables.', 'Add lentils and broth.', 'Simmer until tender.'],
-    category: 'Soup',
+    category: Category.SOUPS_SALADS,
     prepTime: '15 min',
     cookTime: '45 min',
     yields: '6 servings',
     imageUrl: '',
     addedBy: 'Chef David',
     userColor: '#33A8FF',
+    timestamp: Date.now(),
   },
 ];
 

@@ -24,7 +24,7 @@ const Intro: React.FC<{ onStart: () => void }> = ({ onStart }) => {
         <div style={tartanStyles} className="flex flex-col items-center justify-start min-h-screen w-full relative overflow-y-auto pb-20">
             <div className="absolute inset-0 bg-black/30 fixed"></div>
 
-            <div className="relative z-10 bg-stone-50/95 p-8 md:p-16 rounded-sm shadow-2xl max-w-4xl mx-4 text-center border-double border-8 border-stone-800 mt-10 md:mt-20 animate-fade-in">
+            <div style={{ backgroundColor: '#ffffff' }} className="relative z-10 p-8 md:p-16 rounded-sm shadow-2xl max-w-4xl mx-4 text-center border-double border-8 border-stone-800 mt-10 md:mt-20 animate-fade-in">
                 {/* Family Crest */}
                 <div className="mb-8 flex justify-center">
                     <div className="w-40 h-40 md:w-48 md:h-48 relative group perspective-1000">
@@ -49,7 +49,7 @@ const Intro: React.FC<{ onStart: () => void }> = ({ onStart }) => {
                     A Cherished Collection of Recipes Passed Down Through Generations
                 </p>
 
-                <div className="prose prose-stone prose-lg text-stone-700 leading-relaxed text-justify mb-12 mx-auto max-w-2xl bg-stone-100/50 p-6 rounded-lg border border-stone-200 shadow-inner">
+                <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)' }} className="prose prose-stone prose-lg text-stone-700 leading-relaxed text-justify mb-12 mx-auto max-w-2xl p-6 rounded-lg border border-stone-200 shadow-inner">
                     <p className="mb-4 indent-8">
                         My earliest memories of the kitchen are forged links to my Nan, Shirley MacIntosh. It was her domain, a
                         sanctuary where she moved with quiet, purposeful grace, her hands perpetually busy, creating magic from

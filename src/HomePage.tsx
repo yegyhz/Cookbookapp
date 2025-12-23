@@ -9,19 +9,48 @@ interface AppContext {
   favorites: string[];
   toggleFavorite: (e: React.MouseEvent, recipeId: string) => void;
   handleRecipeClick: (recipe: Recipe) => void;
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  selectedCategory: any;
+  setSelectedCategory: (cat: any) => void;
+  layoutMode: 'grid' | 'list';
+  setLayoutMode: (mode: 'grid' | 'list') => void;
+  setView: (view: any) => void;
 }
 
 const HomePage: React.FC = () => {
-  const { recipes, favorites, toggleFavorite, handleRecipeClick } = useOutletContext<AppContext>();
+  const {
+    recipes,
+    favorites,
+    toggleFavorite,
+    handleRecipeClick,
+    searchTerm,
+    setSearchTerm,
+    selectedCategory,
+    setSelectedCategory,
+    layoutMode,
+    setLayoutMode,
+    setView
+  } = useOutletContext<AppContext>();
 
   return (
     <>
-      <CategoryList />
+      <CategoryList
+        recipes={recipes}
+        setView={setView}
+        setSelectedCategory={setSelectedCategory}
+      />
       <RecipeList
         recipes={recipes}
         favorites={favorites}
         toggleFavorite={toggleFavorite}
         handleRecipeClick={handleRecipeClick}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        selectedCategory={selectedCategory}
+        layoutMode={layoutMode}
+        setLayoutMode={setLayoutMode}
+        setView={setView}
       />
     </>
   );

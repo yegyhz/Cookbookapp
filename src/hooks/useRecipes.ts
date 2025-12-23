@@ -58,8 +58,8 @@ export function useRecipes() {
         if (doc.exists()) {
           setFavorites(doc.data().favorites || []);
         } else {
-            // Create the user document if it doesn't exist
-            setDoc(userDocRef, { favorites: [] }).catch(e => setError((e as Error).message));
+          // Create the user document if it doesn't exist
+          setDoc(userDocRef, { favorites: [] }).catch(e => setError((e as Error).message));
         }
       }, (e) => setError((e as Error).message));
       return unsubscribe;
@@ -72,11 +72,11 @@ export function useRecipes() {
     const userDocRef = doc(db, 'users', user.uid);
     const isFavorite = favorites.includes(recipeId);
     try {
-        await updateDoc(userDocRef, {
-            favorites: isFavorite ? arrayRemove(recipeId) : arrayUnion(recipeId)
-        });
+      await updateDoc(userDocRef, {
+        favorites: isFavorite ? arrayRemove(recipeId) : arrayUnion(recipeId)
+      });
     } catch (e) {
-        setError((e as Error).message);
+      setError((e as Error).message);
     }
   };
 
@@ -84,9 +84,9 @@ export function useRecipes() {
     if (!user) return;
     const recipesCol = collection(db, 'users', user.uid, 'recipes');
     try {
-        await addDoc(recipesCol, newRecipe);
+      await addDoc(recipesCol, newRecipe);
     } catch (e) {
-        setError((e as Error).message);
+      setError((e as Error).message);
     }
   };
 
@@ -94,9 +94,9 @@ export function useRecipes() {
     if (!user) return;
     const recipeDocRef = doc(db, 'users', user.uid, 'recipes', updatedRecipe.id);
     try {
-        await updateDoc(recipeDocRef, updatedRecipe);
+      await updateDoc(recipeDocRef, updatedRecipe as any);
     } catch (e) {
-        setError((e as Error).message);
+      setError((e as Error).message);
     }
   }
 
@@ -104,9 +104,9 @@ export function useRecipes() {
     if (!user) return;
     const recipeDocRef = doc(db, 'users', user.uid, 'recipes', recipeId);
     try {
-        await deleteDoc(recipeDocRef);
+      await deleteDoc(recipeDocRef);
     } catch (e) {
-        setError((e as Error).message);
+      setError((e as Error).message);
     }
   }
 

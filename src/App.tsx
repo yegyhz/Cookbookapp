@@ -10,25 +10,34 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import MobileMenu from './components/MobileMenu';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { searchRecipes } from './services/recipeSearchService';
 import { useAppContext } from './context/AppContext';
+import { useRecipeSearch } from './hooks/useRecipeSearch';
 
 // IMPORTANT: Ensure these are the client-side Firebase SDKs, not 'firebase-admin'
-import { auth } from './firebase'; // Adjust this path to your firebase config file
+import { auth } from './firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import AuthComponent from './components/Auth'; // Rename your local Auth component to avoid conflicts
+import AuthComponent from './components/Auth';
 
 const App: React.FC = () => {
   const navigate = useNavigate();
-  const [user] = useAuthState(auth as any); // Type cast if necessary based on your firebase version
+  const [user] = useAuthState(auth);
   const { recipes, favorites, error: recipesError, toggleFavorite, addRecipe, updateRecipe, deleteRecipe } = useAppContext();
+
+  // Use custom hook for search and filtering
+  const {
+    searchTerm,
+    setSearchTerm,
+    selectedCategory,
+    setSelectedCategory,
+    filteredRecipes,
+    handleSearchChange: hookHandleSearchChange
+  } = useRecipeSearch({ recipes, favorites });
+
   const [state, dispatch] = useReducer(appReducer, initialState);
 
   const {
     view,
     isPrinting,
-    searchTerm,
-    selectedCategory,
     showAddModal,
     editingRecipe,
     mobileMenuOpen,
@@ -36,7 +45,6 @@ const App: React.FC = () => {
     isSearchFocused,
     activeSuggestion,
     showDataExport,
-    searchResults,
     error,
   } = state;
 
@@ -61,7 +69,8 @@ const App: React.FC = () => {
   };
 
   const handleCategorySelect = (cat: Category | 'All' | 'Favorites') => {
-    dispatch({ type: 'SELECT_CATEGORY', payload: cat });
+    setSelectedCategory(cat);
+    dispatch({ type: 'SET_MOBILE_MENU_OPEN', payload: false });
   };
 
   const handleAddRecipe = (newRecipe: Recipe) => {
@@ -76,28 +85,10 @@ const App: React.FC = () => {
     setTimeout(() => dispatch({ type: 'SET_SHOW_SUCCESS_TOAST', payload: false }), 3000);
   };
 
-  const handleSearchChange = async (value: string) => {
-    dispatch({ type: 'SET_SEARCH_TERM', payload: value });
-    if (value.trim().length > 0 && user) {
-      try {
-        const data = await searchRecipes(value, user.uid);
-        dispatch({ type: 'SET_SEARCH_RESULTS', payload: data });
-      } catch (err) {
-        console.error('Error searching recipes:', err);
-      }
-    } else {
-      dispatch({ type: 'SET_SEARCH_RESULTS', payload: null });
-    }
+  const handleSearchChange = (value: string) => {
+    // Delegate to hook
+    hookHandleSearchChange(value, user?.uid);
   };
-
-  const filteredRecipes = useMemo(() => {
-    const baseRecipes = searchResults || recipes;
-    return baseRecipes.filter(r => {
-      if (selectedCategory === 'Favorites') return favorites.includes(r.id);
-      if (selectedCategory !== 'All') return r.category === selectedCategory;
-      return true;
-    });
-  }, [recipes, searchResults, selectedCategory, favorites]);
 
   const searchSuggestions = useMemo(() => {
     if (!searchTerm.trim()) return [];
@@ -132,9 +123,9 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-stone-50 font-sans text-stone-900">
       {isPrinting && (
-        <PrintLayout 
-          recipes={filteredRecipes} 
-          onExit={() => dispatch({ type: 'SET_IS_PRINTING', payload: false })} 
+        <PrintLayout
+          recipes={filteredRecipes}
+          onExit={() => dispatch({ type: 'SET_IS_PRINTING', payload: false })}
         />
       )}
 
@@ -144,7 +135,7 @@ const App: React.FC = () => {
         <div className="flex h-screen overflow-hidden">
           <Sidebar
             selectedCategory={selectedCategory}
-            setSelectedCategory={(c) => dispatch({ type: 'SET_SELECTED_CATEGORY', payload: c })}
+            setSelectedCategory={handleCategorySelect}
             setShowDataExport={(s) => dispatch({ type: 'SET_SHOW_DATA_EXPORT', payload: s })}
           />
 
@@ -163,7 +154,19 @@ const App: React.FC = () => {
             />
 
             <div className="flex-1 overflow-y-auto p-4 md:p-8">
-              <Outlet context={{ recipes: filteredRecipes, favorites, toggleFavorite, handleRecipeClick }} />
+              <Outlet context={{
+                recipes: filteredRecipes,
+                favorites,
+                toggleFavorite,
+                handleRecipeClick,
+                searchTerm,
+                setSearchTerm: handleSearchChange, // Note: handleSearchChange takes (value)
+                selectedCategory,
+                setSelectedCategory: handleCategorySelect,
+                layoutMode: state.layoutMode,
+                setLayoutMode: (mode: 'grid' | 'list') => dispatch({ type: 'SET_LAYOUT_MODE', payload: mode }),
+                setView: (view: any) => dispatch({ type: 'SET_VIEW', payload: view })
+              }} />
             </div>
 
             {showSuccessToast && (
@@ -176,7 +179,7 @@ const App: React.FC = () => {
           <MobileMenu
             mobileMenuOpen={mobileMenuOpen}
             setMobileMenuOpen={(o) => dispatch({ type: 'SET_MOBILE_MENU_OPEN', payload: o })}
-            setSelectedCategory={(c) => dispatch({ type: 'SET_SELECTED_CATEGORY', payload: c })}
+            setSelectedCategory={handleCategorySelect}
             handleCategorySelect={handleCategorySelect}
             setView={(v) => dispatch({ type: 'SET_VIEW', payload: v })}
           />
