@@ -5,6 +5,7 @@ import { Recipe } from '../types';
 import { getAvatarColor } from '../utils';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import { useRecipes } from '../hooks/useRecipes';
+import { geminiService } from '../services/api';
 
 const RecipeDetail: React.FC = () => {
     const { recipeId } = useParams<{ recipeId: string }>();
@@ -45,7 +46,7 @@ const RecipeDetail: React.FC = () => {
     }, [recipe?.id]);
 
     const handleBack = () => navigate(-1);
-    
+
     const handleShare = async () => {
         if (!recipe) return;
         const shareData = {
