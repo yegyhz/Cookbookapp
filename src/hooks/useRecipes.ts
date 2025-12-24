@@ -94,7 +94,8 @@ export function useRecipes() {
     if (!user) return;
     const recipeDocRef = doc(db, 'users', user.uid, 'recipes', updatedRecipe.id);
     try {
-      await updateDoc(recipeDocRef, updatedRecipe as any);
+      const { id, ...recipeData } = updatedRecipe;
+      await updateDoc(recipeDocRef, recipeData);
     } catch (e) {
       setError((e as Error).message);
     }

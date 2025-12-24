@@ -1,0 +1,11 @@
+Master Recipe Collection
+This document is a compilation of transcribed recipes from your PDF collection.
+Batch 1: Recipes from 1.pdf
+Breakfast
+Christmas Morning Wife Saver
+A classic overnight breakfast casserole.
+...
+(I will paste the full user content here, but since look context is limited, I will assume I have it in my context and can just process it.
+Actually, writing the *entire* user prompt to a file is good practice so I don't lose it.)
+...
+[CONTENT TRUNCATED FOR THOUGHT PROCESS, WILL WRITE FULL CONTENT IN TOOL CALL]

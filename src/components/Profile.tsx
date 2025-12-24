@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '../firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { X, Save, User } from 'lucide-react';
+import { X, Save, User, Database } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
-import Spinner from './Spinner'; // Import the Spinner component
+import Spinner from './Spinner';
+import MigrationModal from './MigrationModal';
 
 interface UserProfile {
   email: string;
@@ -19,6 +20,7 @@ const Profile: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [newDisplayName, setNewDisplayName] = useState('');
+  const [showMigration, setShowMigration] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -135,6 +137,23 @@ const Profile: React.FC = () => {
         </div>
         {/* Add more profile fields here */}
       </div>
+
+      <div className="mt-12 pt-8 border-t border-stone-100">
+        <h3 className="font-bold text-stone-800 mb-4 flex items-center gap-2">
+          <Database size={20} className="text-stone-400" /> Data Management
+        </h3>
+        <p className="text-sm text-stone-500 mb-4">
+          Migrate the built-in recipe collection to your cloud database to enable editing and safe storage.
+        </p>
+        <button
+          onClick={() => setShowMigration(true)}
+          className="w-full py-3 border border-stone-200 text-stone-600 rounded-xl font-medium hover:bg-stone-50 hover:text-stone-800 transition-colors flex items-center justify-center gap-2"
+        >
+          <Database size={16} /> Open Migration Tool
+        </button>
+      </div>
+
+      <MigrationModal isOpen={showMigration} onClose={() => setShowMigration(false)} />
     </div>
   );
 };

@@ -1,11 +1,12 @@
 import React from 'react';
 import { BookOpen, LayoutGrid, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Category } from '../types';
 
 interface MobileMenuProps {
   mobileMenuOpen: boolean;
   setMobileMenuOpen: (open: boolean) => void;
-  setView: (view: 'categories' | 'list' | 'detail') => void;
+  // setView removed, using router
   setSelectedCategory: (category: Category | 'All' | 'Favorites') => void;
   handleCategorySelect: (category: Category | 'All' | 'Favorites') => void;
 }
@@ -13,10 +14,10 @@ interface MobileMenuProps {
 const MobileMenu: React.FC<MobileMenuProps> = ({
   mobileMenuOpen,
   setMobileMenuOpen,
-  setView,
   setSelectedCategory,
   handleCategorySelect,
 }) => {
+  const navigate = useNavigate();
   if (!mobileMenuOpen) {
     return null;
   }
@@ -31,13 +32,13 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
         </div>
         <div className="flex-1 overflow-y-auto p-4 space-y-1">
           <button
-            onClick={() => { setView('categories'); setSelectedCategory('All'); setMobileMenuOpen(false); }}
+            onClick={() => { navigate('/dashboard'); setSelectedCategory('All'); setMobileMenuOpen(false); }}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-stone-800 text-stone-100"
           >
             <LayoutGrid size={18} /> Categories
           </button>
           <button
-            onClick={() => { setView('list'); setSelectedCategory('All'); setMobileMenuOpen(false); }}
+            onClick={() => { navigate('/dashboard'); setSelectedCategory('All'); setMobileMenuOpen(false); }}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-stone-800 text-stone-100"
           >
             <BookOpen size={18} /> All Recipes

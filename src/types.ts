@@ -23,7 +23,9 @@ export enum Category {
   MAIN_DISHES = "Main Dishes",
   SIDE_DISHES = "Side Dishes",
   DESSERTS = "Desserts & Baked Goods",
-  SAUCES = "Sauces, Condiments & Extras"
+  SAUCES = "Sauces, Condiments & Extras",
+  BREAKFAST = "Breakfast",
+  MISCELLANEOUS = "Miscellaneous"
 }
 
 export interface UserColorMap {

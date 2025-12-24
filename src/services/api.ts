@@ -61,3 +61,10 @@ export const geminiService = {
     });
   },
 };
+
+export const recipeService = {
+  search: async (term: string, userId: string): Promise<any[]> => {
+    if (!term.trim()) return [];
+    return apiCall<any[]>(`/recipes/search?term=${encodeURIComponent(term)}&userId=${encodeURIComponent(userId)}`);
+  },
+};

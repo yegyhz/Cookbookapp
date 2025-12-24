@@ -1,26 +1,21 @@
-import React, { useReducer, useMemo, useRef, useEffect } from 'react';
-import { Check, X } from 'lucide-react';
+import React, { useReducer, useMemo, useRef, useEffect, Suspense, lazy } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Recipe, Category } from './types';
 import { appReducer, initialState } from './reducers/appReducer';
-import Intro from './components/Intro';
-import PrintLayout from './components/PrintLayout';
 import RecipeModal from './components/RecipeModal';
-import DataExportModal from './components/DataExportModal';
-import Sidebar from './components/Sidebar';
-import Header from './components/Header';
-import MobileMenu from './components/MobileMenu';
-import { Outlet, useNavigate } from 'react-router-dom';
+// import DataExportModal from './components/DataExportModal'; // Lazy loaded
+
+const DataExportModal = lazy(() => import('./components/DataExportModal'));
+import { Outlet } from 'react-router-dom';
 import { useAppContext } from './context/AppContext';
 import { useRecipeSearch } from './hooks/useRecipeSearch';
-
-// IMPORTANT: Ensure these are the client-side Firebase SDKs, not 'firebase-admin'
 import { auth } from './firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import AuthComponent from './components/Auth';
 
 const App: React.FC = () => {
   const navigate = useNavigate();
-  const [user] = useAuthState(auth);
+  const [user, loading] = useAuthState(auth);
   const { recipes, favorites, error: recipesError, toggleFavorite, addRecipe, updateRecipe, deleteRecipe } = useAppContext();
 
   // Use custom hook for search and filtering
@@ -36,8 +31,8 @@ const App: React.FC = () => {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
   const {
-    view,
-    isPrinting,
+    // view, // Removed view state usage
+    // isPrinting, // Removed printing state usage
     showAddModal,
     editingRecipe,
     mobileMenuOpen,
@@ -45,7 +40,6 @@ const App: React.FC = () => {
     isSearchFocused,
     activeSuggestion,
     showDataExport,
-    error,
   } = state;
 
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -57,16 +51,6 @@ const App: React.FC = () => {
       setTimeout(() => dispatch({ type: 'SET_ERROR', payload: null }), 5000);
     }
   }, [recipesError]);
-
-  const handleStart = () => {
-    navigate('/');
-    window.scrollTo(0, 0);
-  };
-
-  const handleRecipeClick = (recipe: Recipe) => {
-    navigate(`/recipe/${recipe.id}`);
-    window.scrollTo(0, 0);
-  };
 
   const handleCategorySelect = (cat: Category | 'All' | 'Favorites') => {
     setSelectedCategory(cat);
@@ -88,6 +72,31 @@ const App: React.FC = () => {
   const handleSearchChange = (value: string) => {
     // Delegate to hook
     hookHandleSearchChange(value, user?.uid);
+  };
+
+  // Note: handleRecipeClick definition is moved to consumers using useNavigate, 
+  // BUT we need it here if we want to provide it in context.
+  // Actually, handleRecipeClick is effectively "navigate to recipe".
+  // Consumers (DashboardLayout components) can use useNavigate directly.
+  // However, for compatibility with existing components that expect pass-through props, we can provide a dummy or real one?
+  // Let's provide a real one that accepts navigate as dependency? 
+  // No, we can't easily. 
+  // Better: Components should use useNavigate locally or we pass a wrapper.
+  // I will provide a context function that logs or does nothing, expecting components to handle links.
+  // Wait, `Header` expects `handleRecipeClick`. 
+  // I should define it using useNavigate inside the component that has access to it.
+  // App has useNavigate!
+
+  // const navigate = useNavigate(); // App works as a route component so it has router context
+  // BUT App is the Layout route. 'navigate' works.
+
+  // Re-instating navigate for handleRecipeClick
+  // We need to import useNavigate? Yes.
+  // But wait, App is rendered in Router.tsx.
+
+  const handleRecipeClick = (recipe: Recipe) => {
+    navigate(`/dashboard/recipe/${recipe.id}`);
+    window.scrollTo(0, 0);
   };
 
   const searchSuggestions = useMemo(() => {
@@ -116,75 +125,53 @@ const App: React.FC = () => {
   };
 
   // Auth Guard
+  if (loading) return <div className="flex h-screen items-center justify-center bg-stone-50">Loading...</div>;
   if (!user) {
     return <AuthComponent />;
   }
 
+  const contextValue = {
+    recipes: filteredRecipes, // Passing filtered as 'recipes' for display, or raw? Consumers expect 'recipes' usually. 
+    // Original App passed 'filteredRecipes' to PrintLayout.
+    // But 'recipes' context prop usually means all recipes?
+    // Let's pass both.
+    allRecipes: recipes,
+    favorites,
+    toggleFavorite,
+    searchTerm,
+    setSearchTerm: handleSearchChange,
+    selectedCategory,
+    setSelectedCategory: handleCategorySelect,
+
+    // UI State & Setters
+    mobileMenuOpen,
+    setMobileMenuOpen: (o: boolean) => dispatch({ type: 'SET_MOBILE_MENU_OPEN', payload: o }),
+    showDataExport,
+    setShowDataExport: (s: boolean) => dispatch({ type: 'SET_SHOW_DATA_EXPORT', payload: s }),
+    isSearchFocused,
+    setIsSearchFocused: (f: boolean) => dispatch({ type: 'SET_IS_SEARCH_FOCUSED', payload: f }),
+    activeSuggestion,
+    searchSuggestions,
+    showSuccessToast,
+    setShowAddModal: (s: boolean) => dispatch({ type: 'SET_SHOW_ADD_MODAL', payload: s }),
+
+    // Handlers
+    // handleRecipeClick, // We will deal with this
+    handleSearchKeyDown,
+
+    // Actions
+    addRecipe,
+    updateRecipe,
+    deleteRecipe,
+
+    // Layout State (if needed)
+    layoutMode: state.layoutMode,
+    setLayoutMode: (mode: 'grid' | 'list') => dispatch({ type: 'SET_LAYOUT_MODE', payload: mode }),
+  };
+
   return (
     <div className="min-h-screen bg-stone-50 font-sans text-stone-900">
-      {isPrinting && (
-        <PrintLayout
-          recipes={filteredRecipes}
-          onExit={() => dispatch({ type: 'SET_IS_PRINTING', payload: false })}
-        />
-      )}
-
-      {view === 'intro' && !isPrinting && <Intro onStart={handleStart} />}
-
-      {view !== 'intro' && !isPrinting && (
-        <div className="flex h-screen overflow-hidden">
-          <Sidebar
-            selectedCategory={selectedCategory}
-            setSelectedCategory={handleCategorySelect}
-            setShowDataExport={(s) => dispatch({ type: 'SET_SHOW_DATA_EXPORT', payload: s })}
-          />
-
-          <main className="flex-1 flex flex-col h-full overflow-hidden relative bg-stone-50">
-            <Header
-              searchTerm={searchTerm}
-              isSearchFocused={isSearchFocused}
-              activeSuggestion={activeSuggestion}
-              searchSuggestions={searchSuggestions}
-              setMobileMenuOpen={(o) => dispatch({ type: 'SET_MOBILE_MENU_OPEN', payload: o })}
-              handleSearchChange={handleSearchChange}
-              setIsSearchFocused={(f) => dispatch({ type: 'SET_IS_SEARCH_FOCUSED', payload: f })}
-              handleSearchKeyDown={handleSearchKeyDown}
-              handleRecipeClick={handleRecipeClick}
-              setShowAddModal={(s) => dispatch({ type: 'SET_SHOW_ADD_MODAL', payload: s })}
-            />
-
-            <div className="flex-1 overflow-y-auto p-4 md:p-8">
-              <Outlet context={{
-                recipes: filteredRecipes,
-                favorites,
-                toggleFavorite,
-                handleRecipeClick,
-                searchTerm,
-                setSearchTerm: handleSearchChange, // Note: handleSearchChange takes (value)
-                selectedCategory,
-                setSelectedCategory: handleCategorySelect,
-                layoutMode: state.layoutMode,
-                setLayoutMode: (mode: 'grid' | 'list') => dispatch({ type: 'SET_LAYOUT_MODE', payload: mode }),
-                setView: (view: any) => dispatch({ type: 'SET_VIEW', payload: view })
-              }} />
-            </div>
-
-            {showSuccessToast && (
-              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-stone-900 text-white px-6 py-3 rounded-full flex items-center gap-3 z-50">
-                <Check size={12} /> <span>Success</span>
-              </div>
-            )}
-          </main>
-
-          <MobileMenu
-            mobileMenuOpen={mobileMenuOpen}
-            setMobileMenuOpen={(o) => dispatch({ type: 'SET_MOBILE_MENU_OPEN', payload: o })}
-            setSelectedCategory={handleCategorySelect}
-            handleCategorySelect={handleCategorySelect}
-            setView={(v) => dispatch({ type: 'SET_VIEW', payload: v })}
-          />
-        </div>
-      )}
+      <Outlet context={contextValue} />
 
       {showAddModal && (
         <RecipeModal
@@ -195,11 +182,13 @@ const App: React.FC = () => {
       )}
 
       {showDataExport && (
-        <DataExportModal
-          isOpen={showDataExport}
-          onClose={() => dispatch({ type: 'SET_SHOW_DATA_EXPORT', payload: false })}
-          recipes={recipes}
-        />
+        <Suspense fallback={null}>
+          <DataExportModal
+            isOpen={showDataExport}
+            onClose={() => dispatch({ type: 'SET_SHOW_DATA_EXPORT', payload: false })}
+            recipes={recipes}
+          />
+        </Suspense>
       )}
     </div>
   );

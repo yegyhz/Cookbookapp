@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit2, Trash2, Share2, Printer, Heart, ChefHat, Clock, ImageIcon } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, Share2, Printer, Heart } from 'lucide-react';
 import { Recipe } from '../types';
 import { getAvatarColor } from '../utils';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import { useRecipes } from '../hooks/useRecipes';
 import { geminiService } from '../services/api';
+import GeminiChefTips from './GeminiChefTips';
 
 const RecipeDetail: React.FC = () => {
     const { recipeId } = useParams<{ recipeId: string }>();
@@ -15,13 +16,9 @@ const RecipeDetail: React.FC = () => {
     const [recipe, setRecipe] = useState<Recipe | null>(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-    const [tips, setTips] = useState<string | null>(null);
-    const [loadingTips, setLoadingTips] = useState(false);
-    const [errorTips, setErrorTips] = useState<string | null>(null);
 
-    const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-    const [imageError, setImageError] = useState<string | null>(null);
-    const [imagePrompt, setImagePrompt] = useState<string>('');
+
+
 
     useEffect(() => {
         if (!loading && recipeId) {
@@ -37,11 +34,7 @@ const RecipeDetail: React.FC = () => {
     // Reset states when recipe changes
     useEffect(() => {
         if (recipe) {
-            setTips(null);
-            setErrorTips(null);
-            setLoadingTips(false);
-            setImageError(null);
-            setIsGeneratingImage(false);
+
         }
     }, [recipe?.id]);
 
@@ -68,55 +61,9 @@ const RecipeDetail: React.FC = () => {
         }
     };
 
-    const getGeminiTips = async () => {
-        if (!recipe) return;
-        setLoadingTips(true);
-        setErrorTips(null);
+    // Tips logic moved to GeminiChefTips component
 
-        try {
-            const prompt = `
-        You are an expert chef assisting a home cook with a treasured family recipe. 
-        Recipe: ${recipe.title}
-        Description: ${recipe.description || 'None'}
-        Ingredients: ${recipe.ingredients.join(', ')}
-        Instructions: ${recipe.instructions.join(', ')}
 
-        Please provide 3 specific, actionable, and helpful "Chef's Tips" for making this recipe perfect. 
-        Focus on technique, ingredient selection, or common pitfalls. 
-        Keep the tone encouraging and warm, like a grandmother teaching her grandchild.
-        Format as a simple list.
-      `;
-
-            const data = await geminiService.getTips(prompt); // Use the new API service
-            setTips(data.text || "No tips generated.");
-        } catch (e: any) {
-            console.error(e);
-            setErrorTips(e.message || "Sorry, the chef is busy right now. Please try again later.");
-        } finally {
-            setLoadingTips(false);
-        }
-    };
-
-    const generateImage = async () => {
-        if (!recipe) return;
-        setIsGeneratingImage(true);
-        setImageError(null);
-
-        try {
-            const prompt = `Professional food photography of ${recipe.title}, ${recipe.description || ''}. Focus on a visually stunning, appetizing presentation. Use a shallow depth of field (f/1.8), soft, warm natural lighting from the side, and a clean, rustic plating style. High resolution, suitable for a gourmet family cookbook.`;
-
-            const data = await geminiService.generateImage(imagePrompt || prompt); // Use the new API service
-            const updatedRecipe = { ...recipe, imageUrl: data.imageUrl };
-            updateRecipe(updatedRecipe); // Use updateRecipe from useRecipes hook
-            setRecipe(updatedRecipe); // Update local state as well
-
-        } catch (e: any) {
-            console.error(e);
-            setImageError(e.message || "Failed to generate image. Please try again.");
-        } finally {
-            setIsGeneratingImage(false);
-        }
-    };
 
     const handleDelete = () => {
         if (recipe) {
@@ -272,42 +219,7 @@ const RecipeDetail: React.FC = () => {
                         ))}
                     </ul>
 
-                    {/* Image Generation Controls (Desktop) - Hidden in Print */}
-                    <div className="mt-12 p-6 bg-stone-50 rounded-2xl border border-stone-100 print:hidden">
-                        <h4 className="font-bold text-stone-700 mb-4 flex items-center gap-2">
-                            <ImageIcon size={18} className="text-sky-600" />
-                            {recipe.imageUrl ? "Update Photo" : "Generate Photo"}
-                        </h4>
-                        <div className="flex flex-col gap-3">
-                            <p className="text-xs text-stone-500">The AI will generate a search query for Unsplash.</p>
-                            <input
-                                type="text"
-                                placeholder="AI-generated search query..."
-                                value={imagePrompt}
-                                onChange={(e) => setImagePrompt(e.target.value)}
-                                className="w-full pl-4 pr-4 py-2 bg-white border border-stone-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none transition-all placeholder:text-stone-400 text-sm"
-                            />
-                            <button
-                                onClick={generateImage}
-                                disabled={isGeneratingImage}
-                                className={`w-full py-3 rounded-xl font-bold text-sm text-white shadow-lg transition-all flex items-center justify-center gap-2 ${isGeneratingImage ? 'bg-stone-400 cursor-not-allowed' : 'bg-sky-600 hover:bg-sky-700 hover:shadow-sky-200'}`}
-                            >
-                                {isGeneratingImage ? (
-                                    <>
-                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                        Searching...
-                                    </>
-                                ) : (
-                                    <>
-                                        <ChefHat size={16} />
-                                        {recipe.imageUrl ? "Regenerate Photo" : "Create Photo"}
-                                    </>
-                                )}
-                            </button>
-                            {imageError && <p className="text-xs text-rose-500 mt-2 text-center">{imageError}</p>}
-                            <p className="text-[10px] text-stone-400 text-center mt-1">Images from Unsplash. Powered by Gemini.</p>
-                        </div>
-                    </div>
+
 
                 </div>
 
@@ -330,51 +242,9 @@ const RecipeDetail: React.FC = () => {
                         ))}
                     </ol>
 
-                    {/* Gemini AI Tips Section - Hidden on Print */}
-                    <div className="mt-16 bg-gradient-to-br from-sky-50/80 to-white rounded-3xl p-8 border border-sky-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] print:hidden relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-4 opacity-[0.03] text-sky-900 pointer-events-none">
-                            <ChefHat size={150} />
-                        </div>
-                        <div className="relative z-10">
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className="bg-sky-100/50 p-3 rounded-2xl text-sky-800 shadow-sm backdrop-blur-sm">
-                                    <ChefHat size={28} />
-                                </div>
-                                <div>
-                                    <h4 className="font-serif text-xl text-stone-800 font-bold">Nan's Digital Kitchen Assistant</h4>
-                                    <p className="text-xs text-sky-600 uppercase tracking-wide font-bold">Powered by Gemini AI</p>
-                                </div>
-                            </div>
-
-                            {!tips && !loadingTips && (
-                                <div className="text-left">
-                                    <p className="text-stone-600 mb-8 text-base leading-relaxed max-w-2xl">
-                                        Want to make this recipe even better? I can suggest substitutions, serving ideas, or technique tips specifically for this dish.
-                                    </p>
-                                    <button
-                                        onClick={getGeminiTips}
-                                        className="bg-white border border-sky-200 text-sky-800 px-8 py-4 rounded-xl hover:bg-sky-600 hover:text-white transition-all shadow-sm hover:shadow-lg font-medium flex items-center gap-3 group"
-                                    >
-                                        <span className="font-bold tracking-wide">Reveal Chef's Tips</span>
-                                        <ChefHat size={18} className="group-hover:rotate-12 transition-transform" />
-                                    </button>
-                                    {errorTips && <p className="text-red-500 text-sm mt-4 bg-red-50 p-3 rounded border border-red-100">{errorTips}</p>}
-                                </div>
-                            )}
-
-                            {loadingTips && (
-                                <div className="flex flex-col items-center justify-center py-12">
-                                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-sky-100 border-t-sky-600 mb-6"></div>
-                                    <p className="text-stone-500 font-serif italic text-lg animate-pulse">Consulting the cookbook...</p>
-                                </div>
-                            )}
-
-                            {tips && (
-                                <div className="prose prose-stone text-stone-700 bg-white/80 p-8 rounded-2xl border border-sky-100/50 backdrop-blur-sm shadow-sm">
-                                    <div className="whitespace-pre-line leading-relaxed italic font-serif text-lg">{tips}</div>
-                                </div>
-                            )}
-                        </div>
+                    {/* Gemini AI Tips Section */}
+                    <div className="print:hidden">
+                        <GeminiChefTips recipe={recipe} />
                     </div>
                 </div>
             </div>

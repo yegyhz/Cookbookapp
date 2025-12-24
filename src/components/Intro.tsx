@@ -17,8 +17,16 @@ const tartanStyles = {
 };
 
 
-const Intro: React.FC<{ onStart: () => void }> = ({ onStart }) => {
+import { useNavigate } from 'react-router-dom';
+
+const Intro: React.FC = () => {
+    const navigate = useNavigate();
     const [imgError, setImgError] = useState(false);
+
+    const onStart = () => {
+        navigate('/dashboard');
+        window.scrollTo(0, 0);
+    };
 
     return (
         <div style={tartanStyles} className="flex flex-col items-center justify-start min-h-screen w-full relative overflow-y-auto pb-20">
