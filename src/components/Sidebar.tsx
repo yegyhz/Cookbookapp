@@ -30,10 +30,15 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <aside className="hidden md:flex w-64 flex-col bg-stone-900 text-stone-300 border-r border-stone-800 z-20 shadow-xl">
       {/* Logo/Header */}
-      <div className="p-6 border-b border-stone-800">
-        <h1 className="font-serif text-2xl text-stone-100 mb-1">Shirley’s Kitchen</h1>
-        <p className="text-xs text-stone-500 uppercase tracking-widest">Family Cookbook</p>
-        {user && <p className="text-xs text-stone-400 mt-2">Welcome, {user.email}</p>}
+      <div className="p-8 border-b border-stone-800">
+        <h1 className="font-serif text-3xl text-stone-100 mb-1 leading-none">Shirley&rsquo;s Kitchen</h1>
+        <p className="text-[10px] text-stone-500 uppercase tracking-[0.2em] font-medium">Family Cookbook</p>
+
+        {/* Optional User Welcome - keeping it subtle */}
+        {user && <div className="mt-4 pt-4 border-t border-stone-800/50 text-xs text-stone-500 flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-green-500"></div>
+          {user.displayName || user.email?.split('@')[0]}
+        </div>}
       </div>
 
       {/* Navigation */}
@@ -86,7 +91,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           <FileJson size={14} /> Developer Data
         </button>
         <button onClick={logOut} className="w-full flex items-center justify-center gap-2 py-2 rounded-lg hover:bg-red-900/50 hover:text-red-100 transition-colors">
-            <LogOut size={14} /> Sign Out
+          <LogOut size={14} /> Sign Out
         </button>
         <p>&copy; 2024 MacIntosh Family</p>
       </div>

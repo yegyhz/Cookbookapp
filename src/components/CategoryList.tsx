@@ -16,9 +16,9 @@ const CategoryList: React.FC<CategoryListProps> = ({
 }) => {
   const safeRecipes = recipes || [];
   return (
-    <div className="max-w-7xl mx-auto animate-fade-in">
-      <div className="mb-10 text-center md:text-left">
-        <h2 className="font-serif text-3xl md:text-4xl text-stone-800 mb-3">Welcome to the Kitchen</h2>
+    <div className="max-w-7xl mx-auto animate-fade-in p-8">
+      <div className="mb-12 text-center">
+        <h2 className="font-serif text-4xl md:text-5xl text-stone-800 mb-4">Welcome to the Kitchen</h2>
         <p className="text-stone-500 text-lg">Select a category to explore Nan's collection.</p>
       </div>
 
@@ -37,14 +37,14 @@ const CategoryList: React.FC<CategoryListProps> = ({
         {/* All Recipes Card */}
         <button
           onClick={() => { setSelectedCategory('All'); setView('list'); }}
-          className="group relative p-8 h-64 rounded-[2rem] border border-stone-200 shadow-sm hover:shadow-2xl transition-all duration-500 bg-white flex flex-col items-center justify-center text-center gap-6 hover:-translate-y-2 overflow-hidden"
+          className="group relative p-6 h-64 rounded-[2rem] shadow-sm hover:shadow-xl transition-all duration-300 bg-white border border-stone-200 flex flex-col items-center justify-center text-center gap-4 hover:-translate-y-1 overflow-hidden"
         >
-          <div className="bg-stone-50 p-5 rounded-2xl shadow-sm group-hover:scale-110 transition-transform duration-300 ring-4 ring-stone-100 relative z-10 text-stone-700">
+          <div className="bg-stone-50 p-4 rounded-2xl shadow-sm mb-2 text-stone-600 relative z-10">
             <BookOpen size={32} />
           </div>
-          <div className="relative z-10 text-stone-800">
-            <h3 className="font-serif text-2xl font-bold mb-2">All Recipes</h3>
-            <span className="inline-block px-3 py-1 bg-stone-100 rounded-full text-xs font-bold uppercase tracking-widest text-stone-600">
+          <div className="relative z-10">
+            <h3 className="font-serif text-xl font-bold mb-1 leading-tight text-stone-900">All Recipes</h3>
+            <span className="inline-block px-3 py-1 bg-stone-100 rounded-full text-[10px] font-bold uppercase tracking-widest text-stone-500">
               {safeRecipes.length} Total
             </span>
           </div>
