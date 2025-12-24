@@ -11,7 +11,7 @@ import { useAppContext } from './context/AppContext';
 import { useRecipeSearch } from './hooks/useRecipeSearch';
 import { auth } from './firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import AuthComponent from './components/Auth';
+import SimpleAuth from './components/SimpleAuth';
 
 const App: React.FC = () => {
   const navigate = useNavigate();
@@ -127,7 +127,7 @@ const App: React.FC = () => {
   // Auth Guard
   if (loading) return <div className="flex h-screen items-center justify-center bg-stone-50">Loading...</div>;
   if (!user) {
-    return <AuthComponent />;
+    return <SimpleAuth />;
   }
 
   const contextValue = {

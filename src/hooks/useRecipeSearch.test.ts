@@ -10,6 +10,16 @@ jest.mock('../services/api', () => ({
     },
 }));
 
+// Mock console.error to suppress expected error logs during testing
+const originalError = console.error;
+beforeAll(() => {
+    console.error = jest.fn();
+});
+
+afterAll(() => {
+    console.error = originalError;
+});
+
 const mockRecipes: Recipe[] = [
     {
         id: '1',
