@@ -54,7 +54,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 setShowDataExport={setShowDataExport}
             />
 
-            <main className="flex-1 flex flex-col h-full overflow-hidden relative bg-stone-50">
+            <main className="flex-1 flex flex-col h-full overflow-hidden relative bg-white">
                 <Header
                     searchTerm={searchTerm}
                     isSearchFocused={isSearchFocused}

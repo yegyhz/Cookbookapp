@@ -47,11 +47,6 @@ const CategoryCard: React.FC<{ category: Category; count: number; onClick: () =>
             onClick={onClick}
             className={`group relative p-6 h-64 rounded-[2rem] shadow-sm hover:shadow-xl transition-all duration-300 ${getCardStyle(category)} flex flex-col items-center justify-center text-center gap-4 hover:-translate-y-1 overflow-hidden`}
         >
-            {/* Background Icon (Decorative) */}
-            <div className={`absolute top-4 right-4 opacity-20 transform scale-150 ${getIconColor(category)}`}>
-                {getIcon(category)}
-            </div>
-
             {/* Main Icon Box */}
             <div className={`bg-white p-4 rounded-2xl shadow-sm mb-2 ${getIconColor(category)} relative z-10`}>
                 {getIcon(category)}

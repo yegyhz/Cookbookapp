@@ -22,7 +22,7 @@ const CategoryList: React.FC<CategoryListProps> = ({
         <p className="text-stone-500 text-lg">Select a category to explore Nan's collection.</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {Object.values(Category).map((cat) => {
           const count = safeRecipes.filter(r => r.category === cat).length;
           return (
