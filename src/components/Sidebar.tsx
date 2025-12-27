@@ -28,7 +28,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   }
 
   return (
-    <aside className="hidden md:flex w-64 flex-col bg-stone-900 text-stone-300 border-r border-stone-800 z-20 shadow-xl">
+    <aside className="flex flex-col w-64 bg-stone-900 text-stone-300 border-r border-stone-800 h-full">
       {/* Logo/Header */}
       <div className="p-8 border-b border-stone-800">
         <h1 className="font-serif text-3xl text-stone-100 mb-1 leading-none">Shirley&rsquo;s Kitchen</h1>

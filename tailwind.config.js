@@ -7,44 +7,38 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
+        sans: ['"Inter"', 'sans-serif'],
         serif: ['"Playfair Display"', 'serif'],
-        sans: ['"Lato"', 'sans-serif'],
       },
       colors: {
         stone: {
-          50: '#fafaf9',
-          100: '#f5f5f4',
-          200: '#e7e5e4',
-          300: '#d6d3d1',
-          400: '#a8a29e',
-          500: '#78716c',
-          600: '#57534e',
-          700: '#44403c',
-          800: '#292524',
-          900: '#1c1917',
+          50: '#fcfaf8',
+          100: '#f5f2ed', // Warm background
+          200: '#e6e0d6',
+          300: '#d1c7b8',
+          400: '#b0a390',
+          500: '#948672',
+          600: '#7a6c5b',
+          700: '#5c5144',
+          800: '#3e362e',
+          900: '#26221d',
         },
-        amber: {
-          50: '#fffbeb',
-          100: '#fef3c7',
-          200: '#fde68a',
-          500: '#f59e0b',
-          600: '#d97706',
-          700: '#b45309',
-          900: '#78350f',
+        // Muted Green Accent
+        sage: {
+          50: '#f4f7f4',
+          100: '#e3ebe3',
+          200: '#c5dac5',
+          300: '#9cbfa5',
+          400: '#749f7f',
+          500: '#52805e',
+          600: '#3e6348',
+          700: '#334f3b',
+          800: '#2a3e30',
+          900: '#233328',
         },
-        // Palette 1 (Pale Sky)
         sky: {
           50: '#EDF4F8',
-          100: '#DBE9F0',
-          200: '#B6D3E2',
-          300: '#92BCD3',
-          400: '#6DA6C5',
-          500: '#4990B6',
-          600: '#3A7392',
-          700: '#2C566D',
-          800: '#1D3A49',
-          900: '#0F1D24',
-          950: '#0A141A',
+          // ... existing sky if needed, or remove if unused in new design
         }
       },
       animation: {

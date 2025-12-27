@@ -14,6 +14,8 @@ export interface Recipe {
   userColor?: string; // Hex code for user avatar/badge
   timestamp: number;
   imageUrl?: string;
+  servings?: string;
+  source?: string;
 }
 
 export enum Category {

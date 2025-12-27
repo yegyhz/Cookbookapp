@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
-import MobileMenu from '../components/MobileMenu';
 import { Check } from 'lucide-react';
 import { Recipe, Category } from '../types';
 
@@ -22,8 +21,6 @@ interface DashboardLayoutProps {
     setShowAddModal: (show: boolean) => void;
     showSuccessToast: boolean;
     mobileMenuOpen: boolean;
-    // setView removed
-    // Context to be passed to Outlet
     outletContext: any;
 }
 
@@ -35,26 +32,62 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     isSearchFocused,
     activeSuggestion,
     searchSuggestions,
-    setMobileMenuOpen,
+    setMobileMenuOpen, // This might need to be state local to Layout
     handleSearchChange,
     setIsSearchFocused,
     handleSearchKeyDown,
     handleRecipeClick,
     setShowAddModal,
     showSuccessToast,
-    mobileMenuOpen,
-    // setView removed
+    mobileMenuOpen, // Controlled by App.tsx? No, let's use local state for simplicity if possible, or pass props
     outletContext
 }) => {
-    return (
-        <div className="flex h-screen overflow-hidden">
-            <Sidebar
-                selectedCategory={selectedCategory}
-                setSelectedCategory={setSelectedCategory}
-                setShowDataExport={setShowDataExport}
-            />
 
-            <main className="flex-1 flex flex-col h-full overflow-hidden relative bg-white">
+    // We use the passed setMobileMenuOpen prop to control mobile menu
+    // But typically Sidebar handles its own mobile visibility or we wrap it.
+    // For now, let's assume Sidebar is hidden on mobile and we use a mobile drawer.
+    // However, existing Sidebar logic needs checking.
+    // Let's stick to the prompt: Sidebar Left, Header Top, Content Right.
+
+    return (
+        <div className="flex bg-stone-50 min-h-screen overflow-hidden font-sans">
+            {/* Desktop Sidebar */}
+            <div className="hidden md:flex flex-shrink-0 z-20 shadow-xl">
+                <Sidebar
+                    selectedCategory={selectedCategory}
+                    setSelectedCategory={setSelectedCategory}
+                    setShowDataExport={setShowDataExport}
+                />
+            </div>
+
+            {/* Mobile Sidebar Overlay */}
+            {mobileMenuOpen && (
+                <div className="fixed inset-0 z-50 flex md:hidden">
+                    {/* Backdrop */}
+                    <div
+                        className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+                        onClick={() => setMobileMenuOpen(false)}
+                    />
+
+                    {/* Drawer */}
+                    <div className="relative flex-1 max-w-[85vw] w-64">
+                        <Sidebar
+                            selectedCategory={selectedCategory}
+                            setSelectedCategory={(cat) => { setSelectedCategory(cat); setMobileMenuOpen(false); }}
+                            setShowDataExport={setShowDataExport}
+                        />
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="absolute top-4 right-[-3rem] p-2 bg-white rounded-full text-stone-900 shadow-lg"
+                        >
+                            <Check size={20} className="rotate-45" /> {/* X icon replacement */}
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
                 <Header
                     searchTerm={searchTerm}
                     isSearchFocused={isSearchFocused}
@@ -68,23 +101,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     setShowAddModal={setShowAddModal}
                 />
 
-                <div className="flex-1 overflow-y-auto p-4 md:p-8">
+                <main className="flex-1 overflow-y-auto p-4 md:p-8 relative scroll-smooth">
                     <Outlet context={outletContext} />
-                </div>
 
-                {showSuccessToast && (
-                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-stone-900 text-white px-6 py-3 rounded-full flex items-center gap-3 z-50">
-                        <Check size={12} /> <span>Success</span>
-                    </div>
-                )}
-            </main>
-
-            <MobileMenu
-                mobileMenuOpen={mobileMenuOpen}
-                setMobileMenuOpen={setMobileMenuOpen}
-                setSelectedCategory={setSelectedCategory}
-                handleCategorySelect={setSelectedCategory}
-            />
+                    {showSuccessToast && (
+                        <div className="fixed bottom-8 right-8 bg-stone-900 text-white px-6 py-3 rounded-xl flex items-center gap-3 z-50 shadow-lg animate-slide-up">
+                            <Check size={16} /> <span className="text-sm font-medium">Action Successful</span>
+                        </div>
+                    )}
+                </main>
+            </div>
         </div>
     );
 };

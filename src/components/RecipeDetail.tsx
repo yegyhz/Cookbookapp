@@ -1,69 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit2, Trash2, Share2, Printer, Heart } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, Share2, Printer, Heart, Clock, Users, ChefHat } from 'lucide-react';
 import { Recipe } from '../types';
-import { getAvatarColor } from '../utils';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import { useRecipes } from '../hooks/useRecipes';
-import { geminiService } from '../services/api';
 import GeminiChefTips from './GeminiChefTips';
 
 const RecipeDetail: React.FC = () => {
     const { recipeId } = useParams<{ recipeId: string }>();
     const navigate = useNavigate();
-    const { recipes, loading, error, favorites, toggleFavorite, updateRecipe, deleteRecipe } = useRecipes();
-
+    const { recipes, loading, error, favorites, toggleFavorite, deleteRecipe } = useRecipes();
     const [recipe, setRecipe] = useState<Recipe | null>(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-
-
-
-
 
     useEffect(() => {
         if (!loading && recipeId) {
             const foundRecipe = recipes.find(r => r.id === recipeId);
-            if (foundRecipe) {
-                setRecipe(foundRecipe);
-            } else {
-                navigate('/');
-            }
+            if (foundRecipe) setRecipe(foundRecipe);
+            else navigate('/');
         }
     }, [recipeId, recipes, loading, navigate]);
-
-    // Reset states when recipe changes
-    useEffect(() => {
-        if (recipe) {
-
-        }
-    }, [recipe?.id]);
 
     const handleBack = () => navigate(-1);
 
     const handleShare = async () => {
         if (!recipe) return;
-        const shareData = {
-            title: recipe.title,
-            text: `Check out this recipe for ${recipe.title} from Shirley's Kitchen!`,
-            url: window.location.href
-        };
-
         if (navigator.share) {
             try {
-                await navigator.share(shareData);
-            } catch (err) {
-                console.error('Error sharing:', err);
-            }
+                await navigator.share({
+                    title: recipe.title,
+                    text: `Check out this recipe for ${recipe.title}!`,
+                    url: window.location.href
+                });
+            } catch (err) { console.error('Error sharing:', err); }
         } else {
-            const text = `${recipe.title}\n\n${recipe.description || ''}\n\nIngredients:\n${recipe.ingredients.join('\n')}\n\nInstructions:\n${recipe.instructions.join('\n')}`;
-            navigator.clipboard.writeText(text);
-            alert('Recipe copied to clipboard!');
+            navigator.clipboard.writeText(window.location.href);
+            alert('Link copied to clipboard!');
         }
     };
-
-    // Tips logic moved to GeminiChefTips component
-
-
 
     const handleDelete = () => {
         if (recipe) {
@@ -72,42 +46,14 @@ const RecipeDetail: React.FC = () => {
         }
     };
 
-    if (loading) return <div className="text-center p-8">Loading...</div>;
-    if (error) return <div className="text-center p-8 text-red-500">Error: {error}</div>;
-    if (!recipe) return <div className="text-center p-8">Recipe not found.</div>;
+    if (loading) return <div className="text-center p-12 text-stone-500">Loading recipe...</div>;
+    if (error) return <div className="text-center p-12 text-red-500">Error: {error}</div>;
+    if (!recipe) return <div className="text-center p-12 text-stone-500">Recipe not found.</div>;
 
     const isRecipeFavorite = favorites.includes(recipe.id);
-    const badgeColor = getAvatarColor(recipe.addedBy, recipe.userColor);
-
 
     return (
-        <div className="max-w-5xl mx-auto bg-white min-h-[85vh] shadow-2xl rounded-none md:rounded-2xl overflow-hidden flex flex-col relative animate-fade-in print:shadow-none print:h-auto border border-white/50 ring-1 ring-stone-200/50">
-
-            {/* Print Specific Styles */}
-            <style>
-                {`
-          @media print {
-            @page { margin: 1.5cm; }
-            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .print-page-number::after { content: counter(page); }
-          }
-        `}
-            </style>
-
-            {/* Print Header */}
-            <div className="hidden print:flex fixed top-0 left-0 w-full justify-between items-center p-8 bg-white z-50 border-b-2 border-stone-800">
-                <div className="flex items-center gap-2">
-                    <h1 className="font-serif text-2xl font-bold text-stone-900">Shirley's Kitchen</h1>
-                </div>
-                <span className="text-stone-500 font-serif italic">{recipe.title}</span>
-            </div>
-
-            {/* Print Footer */}
-            <div className="hidden print:flex fixed bottom-0 left-0 w-full justify-between items-center p-8 bg-white z-50 border-t border-stone-200 text-xs text-stone-500">
-                <span>The MacIntosh Family Cookbook</span>
-                <span className="print-page-number">Page </span>
-            </div>
-
+        <div className="max-w-3xl mx-auto bg-white min-h-[50vh] animate-fade-in pb-12">
             <DeleteConfirmationModal
                 isOpen={showDeleteConfirm}
                 onClose={() => setShowDeleteConfirm(false)}
@@ -115,140 +61,121 @@ const RecipeDetail: React.FC = () => {
                 recipeTitle={recipe.title}
             />
 
-            {/* Header Controls */}
-            <div className="absolute top-4 left-4 z-20 print:hidden">
-                <button onClick={handleBack} className="bg-white/80 backdrop-blur-md p-2.5 rounded-full shadow-lg border border-white/50 hover:bg-white hover:scale-105 transition-all group">
-                    <ArrowLeft size={24} className="text-stone-600 group-hover:text-stone-900" />
+            {/* Navigation & Actions */}
+            <div className="flex justify-between items-center mb-8 sticky top-0 py-4 bg-white/95 backdrop-blur z-20 print:hidden border-b border-stone-100">
+                <button onClick={handleBack} className="p-2 text-stone-500 hover:text-stone-900 transition-colors flex items-center gap-2">
+                    <ArrowLeft size={20} /> <span className="font-medium text-sm">Back</span>
                 </button>
-            </div>
-            <div className="absolute top-4 right-4 z-20 flex gap-2 print:hidden">
-                <button onClick={() => { /* Placeholder for onEdit logic */ }} className="bg-white/80 backdrop-blur-md p-2.5 rounded-full shadow-lg border border-white/50 hover:bg-white hover:scale-105 transition-all text-stone-600" title="Edit Recipe">
-                    <Edit2 size={24} />
-                </button>
-                <button onClick={() => setShowDeleteConfirm(true)} className="bg-white/80 backdrop-blur-md p-2.5 rounded-full shadow-lg border border-white/50 hover:bg-red-50 hover:text-red-500 hover:scale-105 transition-all text-stone-600" title="Delete Recipe">
-                    <Trash2 size={24} />
-                </button>
-                <button onClick={handleShare} className="bg-white/80 backdrop-blur-md p-2.5 rounded-full shadow-lg border border-white/50 hover:bg-white hover:scale-105 transition-all text-stone-600" title="Share Recipe">
-                    <Share2 size={24} />
-                </button>
-                <button onClick={() => window.print()} className="bg-white/80 backdrop-blur-md p-2.5 rounded-full shadow-lg border border-white/50 hover:bg-white hover:scale-105 transition-all text-stone-600" title="Print Recipe">
-                    <Printer size={24} />
-                </button>
-                <button
-                    onClick={() => toggleFavorite(recipe.id)}
-                    className={`p-2.5 rounded-full shadow-lg border border-white/50 backdrop-blur-md transition-all hover:scale-105 bg-white/80 hover:bg-white ${isRecipeFavorite ? 'text-rose-500' : 'text-stone-400 hover:text-rose-400'}`}
-                >
-                    <Heart size={24} fill={isRecipeFavorite ? "currentColor" : "none"} />
-                </button>
-            </div>
-
-            {/* Hero Section */}
-            <div className={`bg-sky-50 text-center relative overflow-hidden print:bg-white print:p-0 print:border-b-2 print:border-black print:mb-8 transition-all duration-500 print:mt-16 ${recipe.imageUrl ? 'h-[400px] md:h-[500px]' : 'p-8 md:p-16'}`}>
-                {recipe.imageUrl ? (
-                    <div className="absolute inset-0 z-0">
-                        <img src={recipe.imageUrl} alt={recipe.title} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-stone-900/80 via-stone-900/20 to-transparent"></div>
-                    </div>
-                ) : (
-                    <div className="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/food.png')] pointer-events-none"></div>
-                )}
-
-                <div className={`relative z-10 flex flex-col items-center justify-center h-full ${recipe.imageUrl ? 'text-white justify-end pb-12' : 'text-stone-800'}`}>
-                    <span className={`inline-block px-4 py-1.5 rounded-full border font-serif italic text-sm md:text-base mb-4 backdrop-blur-sm shadow-sm print:hidden ${recipe.imageUrl ? 'bg-black/30 border-white/20 text-white' : 'border-sky-200/60 text-sky-700 bg-white/60'}`}>
-                        {recipe.category}
-                    </span>
-                    <h2 className={`font-serif text-4xl md:text-6xl font-bold mb-4 print:text-black drop-shadow-sm max-w-4xl leading-tight ${recipe.imageUrl ? 'text-white text-shadow-lg' : 'text-stone-800'}`}>{recipe.title}</h2>
-                    {recipe.description && <p className={`text-lg md:text-xl italic font-serif max-w-2xl mx-auto leading-relaxed print:text-stone-600 ${recipe.imageUrl ? 'text-stone-200' : 'text-stone-500'}`}>"{recipe.description}"</p>}
-
-                    {/* Metadata Badges */}
-                    <div className={`flex flex-wrap justify-center gap-4 md:gap-8 mt-8 text-sm font-light print:text-stone-800 ${recipe.imageUrl ? 'text-white' : 'text-stone-600'}`}>
-                        {recipe.prepTime && (
-                            <div className={`flex flex-col items-center px-4 py-2 rounded-xl border shadow-sm backdrop-blur-md print:shadow-none print:border-0 ${recipe.imageUrl ? 'bg-black/30 border-white/10' : 'bg-white/50 border-stone-100'}`}>
-                                <span className={`font-bold uppercase text-[10px] tracking-widest mb-1 print:text-black ${recipe.imageUrl ? 'text-sky-200' : 'text-sky-700'}`}>Prep</span>
-                                <span className="font-medium">{recipe.prepTime}</span>
-                            </div>
-                        )}
-                        {recipe.cookTime && (
-                            <div className={`flex flex-col items-center px-4 py-2 rounded-xl border shadow-sm backdrop-blur-md print:shadow-none print:border-0 ${recipe.imageUrl ? 'bg-black/30 border-white/10' : 'bg-white/50 border-stone-100'}`}>
-                                <span className={`font-bold uppercase text-[10px] tracking-widest mb-1 print:text-black ${recipe.imageUrl ? 'text-sky-200' : 'text-sky-700'}`}>Cook</span>
-                                <span className="font-medium">{recipe.cookTime}</span>
-                            </div>
-                        )}
-                        {recipe.temp && (
-                            <div className={`flex flex-col items-center px-4 py-2 rounded-xl border shadow-sm backdrop-blur-md print:shadow-none print:border-0 ${recipe.imageUrl ? 'bg-black/30 border-white/10' : 'bg-white/50 border-stone-100'}`}>
-                                <span className={`font-bold uppercase text-[10px] tracking-widest mb-1 print:text-black ${recipe.imageUrl ? 'text-sky-200' : 'text-sky-700'}`}>Temp</span>
-                                <span className="font-medium">{recipe.temp}</span>
-                            </div>
-                        )}
-                        {recipe.yields && (
-                            <div className={`flex flex-col items-center px-4 py-2 rounded-xl border shadow-sm backdrop-blur-md print:shadow-none print:border-0 ${recipe.imageUrl ? 'bg-black/30 border-white/10' : 'bg-white/50 border-stone-100'}`}>
-                                <span className={`font-bold uppercase text-[10px] tracking-widest mb-1 print:text-black ${recipe.imageUrl ? 'text-sky-200' : 'text-sky-700'}`}>Yields</span>
-                                <span className="font-medium">{recipe.yields}</span>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Added By Badge */}
-                    <div className={`mt-8 pt-6 border-t flex justify-center items-center gap-3 print:border-stone-200 ${recipe.imageUrl ? 'border-white/20' : 'border-stone-200/60'}`}>
-                        <span className={`text-xs uppercase tracking-widest font-bold ${recipe.imageUrl ? 'text-stone-300' : 'text-stone-400'}`}>Recipe Source</span>
-                        <span className={`pl-2 pr-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 shadow-sm border print:bg-transparent print:text-black print:border print:border-black ${recipe.imageUrl ? 'bg-black/40 border-white/10 text-white' : 'bg-white border-stone-100 text-stone-600'}`}>
-                            <div
-                                className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-inner"
-                                style={{ backgroundColor: badgeColor }}
-                            >
-                                {recipe.addedBy.charAt(0).toUpperCase()}
-                            </div>
-                            {recipe.addedBy}
-                        </span>
-                    </div>
+                <div className="flex gap-2">
+                    <button onClick={() => setShowDeleteConfirm(true)} className="p-2 text-stone-400 hover:text-red-500 transition-colors" title="Delete">
+                        <Trash2 size={20} />
+                    </button>
+                    <button onClick={handleShare} className="p-2 text-stone-400 hover:text-stone-900 transition-colors" title="Share">
+                        <Share2 size={20} />
+                    </button>
+                    <button onClick={() => window.print()} className="p-2 text-stone-400 hover:text-stone-900 transition-colors" title="Print">
+                        <Printer size={20} />
+                    </button>
+                    <button onClick={() => toggleFavorite(recipe.id)} className={`p-2 transition-colors ${isRecipeFavorite ? 'text-rose-500' : 'text-stone-400 hover:text-rose-400'}`} title="Favorite">
+                        <Heart size={20} fill={isRecipeFavorite ? "currentColor" : "none"} />
+                    </button>
                 </div>
             </div>
 
-            <div className="flex-1 p-6 md:p-12 grid grid-cols-1 md:grid-cols-12 gap-12 print:block print:p-0 bg-white print:mb-16">
-                {/* Ingredients Column */}
-                <div className="md:col-span-4 border-r-0 md:border-r border-stone-100 pr-0 md:pr-8 print:border-0 print:mb-8">
-                    <h3 className="font-serif text-2xl text-stone-800 border-b-2 border-sky-100 pb-3 mb-6 flex items-center gap-3 print:border-black">
-                        <div className="w-2 h-2 rounded-full bg-sky-500"></div> Ingredients
+            {/* Header Section */}
+            <header className="mb-12 text-center">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-stone-100 rounded-full text-[10px] font-bold uppercase tracking-widest text-stone-600 mb-6">
+                    {recipe.category}
+                </div>
+                <h1 className="text-3xl md:text-5xl font-bold text-stone-900 mb-6 leading-tight tracking-tight">{recipe.title}</h1>
+
+                {recipe.description && (
+                    <p className="text-lg text-stone-600 italic max-w-2xl mx-auto mb-8 leading-relaxed">
+                        {recipe.description}
+                    </p>
+                )}
+
+                {/* Metadata Grid */}
+                <div className="flex flex-wrap justify-center gap-6 md:gap-12 py-6 border-y border-stone-100 max-w-2xl mx-auto">
+                    {recipe.prepTime && (
+                        <div className="flex flex-col items-center gap-1">
+                            <span className="text-[10px] uppercase tracking-widest text-stone-400 font-semibold">Prep Time</span>
+                            <span className="font-medium text-stone-900 flex items-center gap-2"><Clock size={16} className="text-sage-500" /> {recipe.prepTime}</span>
+                        </div>
+                    )}
+                    {recipe.cookTime && (
+                        <div className="flex flex-col items-center gap-1">
+                            <span className="text-[10px] uppercase tracking-widest text-stone-400 font-semibold">Cook Time</span>
+                            <span className="font-medium text-stone-900 flex items-center gap-2"><Clock size={16} className="text-sage-500" /> {recipe.cookTime}</span>
+                        </div>
+                    )}
+                    {recipe.servings && (
+                        <div className="flex flex-col items-center gap-1">
+                            <span className="text-[10px] uppercase tracking-widest text-stone-400 font-semibold">Servings</span>
+                            <span className="font-medium text-stone-900 flex items-center gap-2"><Users size={16} className="text-sage-500" /> {recipe.servings} people</span>
+                        </div>
+                    )}
+                </div>
+            </header>
+
+            {/* Image (Optional but subtle if present) */}
+            {recipe.imageUrl && (
+                <div className="mb-12 rounded-xl overflow-hidden shadow-sm aspect-video bg-stone-100">
+                    <img src={recipe.imageUrl} alt={recipe.title} className="w-full h-full object-cover" />
+                </div>
+            )}
+
+            {/* Content Blocks */}
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_2px_2fr] gap-8 md:gap-12">
+
+                {/* Ingredients Left Panel */}
+                <div>
+                    <h3 className="text-xl font-bold text-stone-900 mb-6 flex items-center gap-3">
+                        Ingredients
                     </h3>
-                    <ul className="space-y-4 text-stone-600 print:space-y-2">
+                    <ul className="space-y-3 text-stone-700 text-sm md:text-base leading-relaxed">
                         {recipe.ingredients.map((ing, i) => (
-                            <li key={i} className="flex gap-4 items-start group p-2 rounded-lg hover:bg-sky-50 transition-colors">
-                                <div className="w-1.5 h-1.5 rounded-full bg-sky-200 mt-2.5 group-hover:bg-sky-500 transition-colors flex-shrink-0 print:bg-black"></div>
-                                <span className="leading-relaxed font-medium text-stone-700">{ing}</span>
+                            <li key={i} className="flex gap-3 pb-3 border-b border-dashed border-stone-100 last:border-0">
+                                <span className="w-1.5 h-1.5 bg-sage-400 rounded-full mt-2 flex-shrink-0" />
+                                <span>{ing}</span>
                             </li>
                         ))}
                     </ul>
-
-
-
                 </div>
 
-                {/* Instructions Column */}
-                <div className="md:col-span-8">
-                    <div className="flex justify-between items-center border-b-2 border-sky-100 pb-3 mb-8 print:border-black">
-                        <h3 className="font-serif text-2xl text-stone-800 flex items-center gap-3">
-                            <div className="w-2 h-2 rounded-full bg-sky-500"></div> Method
-                        </h3>
-                    </div>
+                {/* Divider Line */}
+                <div className="hidden md:block bg-stone-100 rounded-full h-full"></div>
 
-                    <ol className="space-y-8 text-stone-600 print:space-y-4">
+                {/* Instructions Right Panel */}
+                <div>
+                    <h3 className="text-xl font-bold text-stone-900 mb-6 flex items-center gap-3">
+                        Instructions
+                    </h3>
+                    <ol className="space-y-8">
                         {recipe.instructions.map((step, i) => (
-                            <li key={i} className="flex gap-6 group">
-                                <span className="flex-shrink-0 w-10 h-10 rounded-full bg-stone-50 border border-stone-100 text-sky-700 font-serif font-bold text-xl flex items-center justify-center shadow-sm group-hover:bg-sky-50 group-hover:text-sky-800 group-hover:scale-110 transition-all print:bg-transparent print:border print:border-black print:text-black print:w-8 print:h-8 print:text-sm">
+                            <li key={i} className="relative pl-6 border-l-2 border-stone-100 hover:border-sage-300 transition-colors">
+                                <span className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-white border-2 border-stone-200 text-[9px] font-bold text-stone-400 flex items-center justify-center">
                                     {i + 1}
                                 </span>
-                                <p className="mt-1 leading-relaxed text-lg text-stone-700 print:text-base">{step}</p>
+                                <p className="text-stone-700 leading-relaxed text-sm md:text-base">{step}</p>
                             </li>
                         ))}
                     </ol>
-
-                    {/* Gemini AI Tips Section */}
-                    <div className="print:hidden">
-                        <GeminiChefTips recipe={recipe} />
-                    </div>
                 </div>
+            </div>
+
+            <div className="mt-16 pt-8 border-t border-stone-100 print:hidden">
+                <GeminiChefTips recipe={recipe} />
+            </div>
+
+            <div className="mt-8 text-center">
+                <p className="text-xs text-stone-400 flex items-center justify-center gap-2">
+                    <ChefHat size={14} />
+                    Recipe from the collection of <span className="font-medium text-stone-600">{recipe.source || "Nan"}</span>
+                </p>
             </div>
         </div>
     );
 };
+
 export default RecipeDetail;
