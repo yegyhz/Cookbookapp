@@ -20,7 +20,7 @@ import AuthComponent from './components/Auth'; // Rename your local Auth compone
 
 const App: React.FC = () => {
   const navigate = useNavigate();
-  const [user] = useAuthState(auth as any); // Type cast if necessary based on your firebase version
+  const [user] = useAuthState(auth);
   const { recipes, favorites, error: recipesError, toggleFavorite, addRecipe, updateRecipe, deleteRecipe } = useAppContext();
   const [state, dispatch] = useReducer(appReducer, initialState);
 
